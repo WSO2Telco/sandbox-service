@@ -205,7 +205,8 @@ return null;
 			}*/
 
 		} catch (NoResultException e) {
-return null;		} catch (Exception ex) {
+			return null;		} 
+		catch (Exception ex) {
 			LOG.error("###CREDIT### Error in Make Payment Service " + ex);
 			throw ex;
 		}

@@ -791,7 +791,11 @@ Response :
       "callbackData": "callbackData",
       "resourceURL": "http://<host>:<port>/{v1}/credit/{msisdn}/apply"
     },
+<<<<<<< HEAD
 	"referenceCode":"12345",
+=======
+	"referenceCode":"12345"
+>>>>>>> 08f31ad7c0acdef6efdd9427ec6bad5ac6b7b4d3
 	"serverReferenceCode":"REF_00001"
   }
 }
