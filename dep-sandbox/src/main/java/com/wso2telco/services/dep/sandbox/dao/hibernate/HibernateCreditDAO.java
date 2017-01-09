@@ -189,7 +189,8 @@ return null;
 		hql.append("AND calls.serviceName =:serviceName ");
 		hql.append("AND val.tobject =:tableName ");
 		hql.append("AND number.Number =:number ");
-		hql.append("AND val.value =:clientCorrelator");
+		hql.append("AND val.value =:clientCorrelator ");
+		hql.append("AND att.attributeName =:attributeName");
 
 		try {
 			Query query = session.createQuery(hql.toString());
@@ -198,15 +199,12 @@ return null;
 			query.setParameter("number", endUserId);
 			query.setParameter("tableName", TableName.NUMBERS.toString().toLowerCase());
 			query.setParameter("clientCorrelator", clientCorrelator);
+			query.setParameter("attributeName", AttributeName.clientCorrelator.toString());
+			
 			resultSet = (AttributeValues) query.uniqueResult();
-/*			
-			if(resultSet != null){
-				return resultSet;
-			}*/
-
 		} catch (NoResultException e) {
-			return null;		} 
-		catch (Exception ex) {
+			return null;		
+		} catch (Exception ex) {
 			LOG.error("###CREDIT### Error in Make Payment Service " + ex);
 			throw ex;
 		}
