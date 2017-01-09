@@ -58,7 +58,7 @@ public class HibernateCreditDAO  extends AbstractDAO implements CreditDAO{
 		} catch (NoResultException e) {
 			return null;
 		} catch (Exception ex) {
-			LOG.error("###WALLET### Error in Make Payment Service " + ex);
+			LOG.error("###CREDIT### Error in Make Payment Service " + ex);
 			throw ex;
 		}
 		return resultSet;
@@ -98,7 +98,7 @@ public class HibernateCreditDAO  extends AbstractDAO implements CreditDAO{
 			return null;
 			
 	} catch (Exception ex) {
-			LOG.error("###WALLET### Errorr in WALLET Service " + ex);
+			LOG.error("###CREDIT### Errorr in WALLET Service " + ex);
 			throw ex;
 		}
 		return distributionId;
@@ -125,7 +125,7 @@ public class HibernateCreditDAO  extends AbstractDAO implements CreditDAO{
 		} catch (NoResultException e) {
 return null;
 } catch (Exception ex) {
-			LOG.error("###WALLET### Errorr in WALLET Service " + ex);
+			LOG.error("###CREDIT### Errorr in WALLET Service " + ex);
 			throw ex;
 		}
 		return number;
@@ -206,7 +206,7 @@ return null;
 
 		} catch (NoResultException e) {
 return null;		} catch (Exception ex) {
-			LOG.error("###WALLET### Error in Make Payment Service " + ex);
+			LOG.error("###CREDIT### Error in Make Payment Service " + ex);
 			throw ex;
 		}
 		return resultSet;	
@@ -307,7 +307,7 @@ return false;		} catch (Exception ex) {
 		} catch (NoResultException e) {
 			return null;
 		} catch (Exception ex) {
-			LOG.error("###WALLET### Error in getListTransaction Service " + ex);
+			LOG.error("###CREDIT### Error in getListTransaction Service " + ex);
 			throw ex;
 		}
 		return resultSet;
