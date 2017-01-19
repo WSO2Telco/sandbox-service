@@ -915,6 +915,7 @@ Response :
 ```
 
 - List Transactions - Return all the transactions of the end user for the calling application
+Maximum no of returned results is 20
 
 Request :
 
@@ -1022,6 +1023,8 @@ Response :
 ```
 
 - Balance lookup - Check the account balance of an end user
+
+The account status and currency should configure using "Add account information for msisdn" in wallet api related user configuration before call "Balance lookup" service
 
 Request :
 
