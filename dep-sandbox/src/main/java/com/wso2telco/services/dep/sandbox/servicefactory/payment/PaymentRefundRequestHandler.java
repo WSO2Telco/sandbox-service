@@ -50,6 +50,7 @@ import java.util.List;
 
 public class PaymentRefundRequestHandler extends AbstractRequestHandler<PaymentRefundRequestWrapperDTO> {
 
+
     private PaymentDAO paymentDAO;
     private LoggingDAO loggingDAO;
     private NumberDAO numberDAO;
@@ -61,7 +62,7 @@ public class PaymentRefundRequestHandler extends AbstractRequestHandler<PaymentR
     private Integer transactionId;
 
     {
-        LOG = LogFactory.getLog(RefundTransactionRequestHandler.class);
+        LOG = LogFactory.getLog(PaymentRefundRequestHandler.class);
         paymentDAO = DaoFactory.getPaymentDAO();
         loggingDAO = DaoFactory.getLoggingDAO();
         numberDAO = DaoFactory.getNumberDAO();
@@ -196,7 +197,8 @@ public class PaymentRefundRequestHandler extends AbstractRequestHandler<PaymentR
 
             // Save Request Log
             APITypes apiTypes = dao.getAPIType(extendedRequestDTO.getRequestType().toString().toLowerCase());
-            APIServiceCalls apiServiceCalls = dao.getServiceCall(apiTypes.getId(), serviceCallRefund);
+            //This has Hardcoded value
+            APIServiceCalls apiServiceCalls = dao.getServiceCall(6, serviceCallRefund);
 
             Gson gson = new Gson();
             String jsonString = gson.toJson(requestBean);
@@ -467,7 +469,7 @@ public class PaymentRefundRequestHandler extends AbstractRequestHandler<PaymentR
         try {
             AttributeValues valueObj = new AttributeValues();
             String tableName = TableName.NUMBERS.toString().toLowerCase();
-            String attributeName = AttributeName.referenceCodeWallet.toString();
+            String attributeName = AttributeName.referenceCodePayment.toString();
             APITypes api = dao.getAPIType(RequestType.PAYMENT.toString());
             APIServiceCalls call = dao.getServiceCall(api.getId(), serviceCallRefund);
             Attributes attributes = dao.getAttribute(attributeName);

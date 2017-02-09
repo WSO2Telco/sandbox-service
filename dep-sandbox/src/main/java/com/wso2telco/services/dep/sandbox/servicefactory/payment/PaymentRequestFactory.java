@@ -28,17 +28,17 @@ public class PaymentRequestFactory {
 
     public static RequestHandleable getInstance(final RequestDTO requestDTO) {
 
-        final String MAKE_PAYMENT = "payment";
-        final String REFUND_PAYMENT = "refund";
+        final String MAKE_PAYMENT = "ChargePaymentRequestWrapper";
+        final String REFUND_PAYMENT = "PaymentRefundRequestWrapper";
 
-        if (requestDTO.getRequestPath().contains(MAKE_PAYMENT)) {
-            LOG.debug("LOADING MAKE PAYMENT SERVICE");
-            return new PaymentRequestHandler();
-        } else if (requestDTO.getRequestPath().contains(REFUND_PAYMENT)) {
-            LOG.debug("LOADING REFUND PAYMENT SERVICE");
-            return new PaymentRefundRequestHandler();
-        }
+       if(requestDTO.toString().contains(REFUND_PAYMENT)){
+           LOG.debug("LOADING REFUND PAYMENT SERVICE");
+           return new PaymentRefundRequestHandler();
 
+        } else if(requestDTO.toString().contains(MAKE_PAYMENT)){
+           LOG.debug("LOADING MAKE PAYMENT SERVICE");
+           return new PaymentRequestHandler();
+       }
         return null;
     }
 }
