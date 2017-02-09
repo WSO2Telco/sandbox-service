@@ -23,9 +23,9 @@ public class ChargeRefundAmountResponse {
 	
 	private PaymentChargingInformation chargingInformation;
 
-	private String totalAmountRefunded;
-
 	private PaymentChargingMetaData chargingMetaData;
+
+	private String totalAmountRefunded;
 
 	public PaymentChargingInformation getChargingInformation() {
 		return chargingInformation;

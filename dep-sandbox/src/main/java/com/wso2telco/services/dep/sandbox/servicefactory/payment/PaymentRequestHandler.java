@@ -92,8 +92,8 @@ public class PaymentRequestHandler extends AbstractRequestHandler<ChargePaymentR
 
     @Override
     protected boolean validate(ChargePaymentRequestWrapperDTO wrapperDTO) throws Exception {
-        AmountTransactionRequestBean requestBean = wrapperDTO.getAmountTransactionRequestBean();
-        AmountTransactionRequestBean.amountTransaction request = requestBean.getAmountTransaction();
+        PaymentRefundTransactionRequestBean requestBean = wrapperDTO.getPaymentRefundTransactionRequestBean();
+        PaymentRefundTransactionRequestBean.AmountTransaction request = requestBean.getAmountTransaction();
         ChargePaymentAmount paymentAmount = request.getPaymentAmount();
         PaymentChargingInformation chargingInformation = paymentAmount.getChargingInformation();
         PaymentChargingMetaData metaData = paymentAmount.getChargingMetaData();
@@ -165,8 +165,8 @@ public class PaymentRequestHandler extends AbstractRequestHandler<ChargePaymentR
         }
 
         try {
-            AmountTransactionRequestBean requestBean = extendedRequestDTO.getAmountTransactionRequestBean();
-            AmountTransactionRequestBean.amountTransaction request = requestBean.getAmountTransaction();
+            PaymentRefundTransactionRequestBean requestBean = extendedRequestDTO.getPaymentRefundTransactionRequestBean();
+            PaymentRefundTransactionRequestBean.AmountTransaction request = requestBean.getAmountTransaction();
             ChargePaymentAmount paymentAmount = request.getPaymentAmount();
             PaymentChargingInformation chargingInformation = paymentAmount.getChargingInformation();
             PaymentChargingMetaData metadata = paymentAmount.getChargingMetaData();
@@ -214,7 +214,7 @@ public class PaymentRequestHandler extends AbstractRequestHandler<ChargePaymentR
             // check already charge request against client correlator
             if (clientCorrelator != null) {
                 String tableAttributeValue = TableName.SBXATTRIBUTEVALUE.toString().toLowerCase();
-                String clientCorrelatorAttribute = AttributeName.clientCorrelatorPayment.toString();
+                String clientCorrelatorAttribute = AttributeName.clientCorrelatorPayment.toString();  // Todo : change to payment or use wallet
                 AttributeValues duplicateClientCorrelator = paymentDAO.checkDuplicateValue(serviceCallPayment,
                         clientCorrelator, clientCorrelatorAttribute, tableAttributeValue);
                 if (duplicateClientCorrelator != null) {
@@ -364,7 +364,7 @@ public class PaymentRequestHandler extends AbstractRequestHandler<ChargePaymentR
             // set transaction operation status as refused
             else if (transactionStatusValue != null) {
                 String transactionStatus = transactionStatusValue.getValue();
-                if (transactionStatus.equals(TransactionStatus.Refused.toString())) {
+                if (transactionStatus.equals(TransactionStatus.Refused.toString())) {  // Todo: Wallet is used change or
                     responseBean.setTransactionOperationStatus(TransactionStatus.Refused.toString());
                 }
                 // set transaction status as charged
@@ -500,7 +500,7 @@ public class PaymentRequestHandler extends AbstractRequestHandler<ChargePaymentR
             responseWrapper.setHttpStatus(Response.Status.BAD_REQUEST);
         }
     }
-
+    // Todo:wallet or Payment
     public boolean containsChannel(String channelValue) {
         for (Channel channel : Channel.values()) {
             if (channel.name().toLowerCase().equals(channelValue.toLowerCase())) {

@@ -49,6 +49,7 @@ import java.util.List;
 
 public class PaymentRefundRequestHandler extends AbstractRequestHandler<PaymentRefundRequestWrapperDTO> {
 
+
     private PaymentDAO paymentDAO;
     private LoggingDAO loggingDAO;
     private NumberDAO numberDAO;
@@ -331,6 +332,15 @@ public class PaymentRefundRequestHandler extends AbstractRequestHandler<PaymentR
             responseBean.setEndUserId(endUserIdPath);
             responseBean.setOriginalServerReferenceCode(originalServerReferenceCode);
 
+            // Get the Charged Tax Amount
+            Double chargedTaxAmount = Double.parseDouble(taxAmount);
+
+            //Total Amount Refunded
+            Double totalAmountRefunded = chargeAmount+chargedTaxAmount;
+
+            // Setting the total Amount Refunded
+            payAmount.setTotalAmountRefunded(totalAmountRefunded.toString());
+
             chargeInformation.setAmount(amount);
             chargeInformation.setCurrency(currency);
             chargeInformation.setDescription(description);
@@ -346,10 +356,6 @@ public class PaymentRefundRequestHandler extends AbstractRequestHandler<PaymentR
             responseBean.setReferenceCode(referenceCode);
             responseBean.setServerReferenceCode(serverReferenceCode);
             responseBean.setResourceURL(CommonUtil.getResourceUrl(extendedRequestDTO));
-
-            // Get the Charged Tax Amount
-
-            Double chargedTaxAmount = Double.parseDouble(taxAmount);
 
             // set transaction operation status as charged
             ManageNumber manageNumber = numberDAO.getNumber(endUserId, extendedRequestDTO.getUser().getUserName());
