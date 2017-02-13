@@ -60,8 +60,7 @@ public class PaymentService {
         if (makePaymentRequestBean != null) {
             LOG.debug(makePaymentRequestBean);
         }
-
-
+        //Separate Charged and Refunded request calls
         if (makePaymentRequestBean.getAmountTransaction().getTransactionOperationStatus().equals("Charged")) {
 
             ChargePaymentRequestWrapperDTO requestDTO = new ChargePaymentRequestWrapperDTO();
@@ -84,7 +83,6 @@ public class PaymentService {
                         .build();
                 return response;
             }
-
 
         } else {
 
@@ -109,11 +107,6 @@ public class PaymentService {
                         .build();
                 return response;
             }
-
-
         }
-
-
     }
-
 }
