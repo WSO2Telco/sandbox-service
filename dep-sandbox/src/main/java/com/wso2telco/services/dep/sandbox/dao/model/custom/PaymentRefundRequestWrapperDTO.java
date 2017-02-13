@@ -13,8 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.wso2telco.services.dep.sandbox.servicefactory.wallet;
 
-public enum AttributeName {
-	 Payment, Refund, accountStatus, Currency, clientCorrelatorWallet, transactionStatus, referenceCodeWallet, makePayment, clientCorrelatorPayment, referenceCodePayment,refundUser
+package com.wso2telco.services.dep.sandbox.dao.model.custom;
+
+public class PaymentRefundRequestWrapperDTO extends RequestDTO {
+
+	/** The endUserId param **/
+	private String endUserId;
+
+	/** The request bean **/
+	private PaymentRefundTransactionRequestBean refundRequestBean;
+
+	public String getEndUserId() {
+		return endUserId;
+	}
+
+	public void setEndUserId(String endUserId) {
+		this.endUserId = endUserId;
+	}
+
+	public PaymentRefundTransactionRequestBean getRefundRequestBean() {
+		return refundRequestBean;
+	}
+
+	public void setRefundRequestBean(PaymentRefundTransactionRequestBean refundRequestBean) {
+		this.refundRequestBean = refundRequestBean;
+	}
 }

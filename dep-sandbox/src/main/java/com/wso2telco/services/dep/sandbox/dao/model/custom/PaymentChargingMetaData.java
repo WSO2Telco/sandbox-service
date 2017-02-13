@@ -19,13 +19,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(value=Include.NON_NULL)
-public class ChargingMetaData {
+public class PaymentChargingMetaData {
 
 	private String onBehalfOf;
 
 	private String purchaseCategoryCode;
 
 	private String channel;
+
+	private  String taxAmount;
 
 	public String getOnBehalfOf() {
 		return onBehalfOf;
@@ -49,6 +51,14 @@ public class ChargingMetaData {
 
 	public void setChannel(String channel) {
 		this.channel = channel;
+	}
+
+	public String getTaxAmount() {
+		return taxAmount;
+	}
+
+	public void setTaxAmount(String taxAmount) {
+		this.taxAmount = taxAmount;
 	}
 
 	public String toString() {

@@ -13,8 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.wso2telco.services.dep.sandbox.servicefactory.wallet;
+package com.wso2telco.services.dep.sandbox.dao.model.custom;
 
-public enum AttributeName {
-	 Payment, Refund, accountStatus, Currency, clientCorrelatorWallet, transactionStatus, referenceCodeWallet, makePayment, clientCorrelatorPayment, referenceCodePayment,refundUser
+public class PaymentChargingInformation {
+
+	private String amount;
+
+	private String currency;
+
+	private String description;
+	
+	public String getAmount() {
+		return amount;
+	}
+
+	public void setAmount(String amount) {
+		this.amount = amount;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+
+		builder.append(" Amount : " + amount);
+		builder.append(" Currency : " + currency);
+		builder.append(" Description : " + description);
+
+		return builder.toString();
+	}
+
 }

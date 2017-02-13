@@ -19,47 +19,35 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(value=Include.NON_NULL)
-public class ChargingMetaData {
+public class ChargeRefundAmountResponse {
+	
+	private PaymentChargingInformation chargingInformation;
 
-	private String onBehalfOf;
+	private PaymentChargingMetaData chargingMetaData;
 
-	private String purchaseCategoryCode;
+	private String totalAmountRefunded;
 
-	private String channel;
-
-	public String getOnBehalfOf() {
-		return onBehalfOf;
+	public PaymentChargingInformation getChargingInformation() {
+		return chargingInformation;
 	}
 
-	public void setOnBehalfOf(String onBehalfOf) {
-		this.onBehalfOf = onBehalfOf;
+	public void setChargingInformation(PaymentChargingInformation chargingInformation) {
+		this.chargingInformation = chargingInformation;
 	}
 
-	public String getPurchaseCategoryCode() {
-		return purchaseCategoryCode;
+	public PaymentChargingMetaData getChargingMetaData() {
+		return chargingMetaData;
 	}
 
-	public void setPurchaseCategoryCode(String purchaseCategoryCode) {
-		this.purchaseCategoryCode = purchaseCategoryCode;
+	public void setChargingMetaData(PaymentChargingMetaData chargingMetaData) {
+		this.chargingMetaData = chargingMetaData;
 	}
 
-	public String getChannel() {
-		return channel;
+	public String getTotalAmountRefunded() {
+		return totalAmountRefunded;
 	}
 
-	public void setChannel(String channel) {
-		this.channel = channel;
+	public void setTotalAmountRefunded(String totalAmountRefunded) {
+		this.totalAmountRefunded = totalAmountRefunded;
 	}
-
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-
-		builder.append(" onBehalfOf : " + onBehalfOf);
-		builder.append(" categoryCode : " + purchaseCategoryCode);
-		builder.append(" channel : " + channel);
-
-		return builder.toString();
-	}
-
-
 }
