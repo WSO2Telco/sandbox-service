@@ -137,9 +137,7 @@ public class GetAttributeRequestHandler extends
 		} else {
 			responseWrapperDTO.setRequestError(constructRequestError(
 				    SERVICEEXCEPTION, "SVC0002", "Invalid input value for message part %1",
-				    "requestIdentifier"));
-			    responseWrapperDTO.setHttpStatus(Status.BAD_REQUEST);
-			
+				    "requestIdentifier"));			
 		} 
 	    
 	    ValidationRule[] validationRules = new ValidationRule[validationRulesList
@@ -156,7 +154,6 @@ public class GetAttributeRequestHandler extends
 	    responseWrapperDTO.setRequestError(constructRequestError(
 		    SERVICEEXCEPTION, ex.getErrcode(), ex.getErrmsg(),
 		    errorMessage));
-	    responseWrapperDTO.setHttpStatus(Status.BAD_REQUEST);
 	} catch (Exception ex) {
 	    LOG.error("###CUSTOMERINFO### Error in validations", ex);
 	    responseWrapperDTO
@@ -222,7 +219,9 @@ public class GetAttributeRequestHandler extends
 	    return responseWrapperDTO;
 	}
 	// check msisdn,imsi,mcc&mnc has the matching values
-	if ((customerInfoDao.getMSISDN(msisdn, imsi, mcc, mnc,extendedRequestDTO.getUser().getUserName() ) == null)) {
+
+	if ((dao.getMSISDN(msisdn, imsi, mcc, mnc,extendedRequestDTO.getUser().getUserName() ) == null)) {
+
 	    LOG.error("###CUSTOMERINFO### Valid MSISDN doesn't exists for the given inputssss");
 	    responseWrapperDTO
 		    .setRequestError(constructRequestError(SERVICEEXCEPTION,

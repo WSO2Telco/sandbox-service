@@ -15,6 +15,7 @@ import com.wso2telco.dep.oneapivalidation.util.Validation;
 import com.wso2telco.dep.oneapivalidation.util.ValidationRule;
 import com.wso2telco.services.dep.sandbox.dao.DaoFactory;
 import com.wso2telco.services.dep.sandbox.dao.ProvisioningDAO;
+import com.wso2telco.services.dep.sandbox.dao.model.custom.CommonSuccessResponse;
 import com.wso2telco.services.dep.sandbox.dao.model.custom.ProvisioningServicesRequestWrapperDTO;
 import com.wso2telco.services.dep.sandbox.dao.model.custom.ServiceDetail;
 import com.wso2telco.services.dep.sandbox.dao.model.domain.ProvisionAllService;
@@ -56,23 +57,26 @@ public class NewProvisioningService extends AbstractRequestHandler<ProvisioningS
 		String serviceName = CommonUtil.getNullOrTrimmedValue(serviceDetail.getServiceName());
 		String description = CommonUtil.getNullOrTrimmedValue(serviceDetail.getDescription());
 		BigDecimal serviceCharge = serviceDetail.getServiceCharge();
-		
+				
 		try {
 			ValidationRule[] validationRules = {
 					new ValidationRule(ValidationRule.VALIDATION_TYPE_MANDATORY, "serviceCode", serviceCode),
 					new ValidationRule(ValidationRule.VALIDATION_TYPE_MANDATORY, "serviceType", serviceType),
 					new ValidationRule(ValidationRule.VALIDATION_TYPE_MANDATORY, "serviceName", serviceName),
 					new ValidationRule(ValidationRule.VALIDATION_TYPE_MANDATORY, "description", description),
-					new ValidationRule(ValidationRule.VALIDATION_TYPE_MANDATORY_NUMBER, "serviceCharge", serviceCharge) };
+					new ValidationRule(ValidationRule.VALIDATION_TYPE_MANDATORY_DOUBLE_GT_ZERO, "serviceCharge",serviceCharge) };
 			Validation.checkRequestParams(validationRules);
 		} catch (CustomException ex) {
 			LOG.error("###PROVISION### Error in Validation : " + ex);
-			responseWrapperDTO.setHttpStatus(Status.BAD_REQUEST);
-			responseWrapperDTO.setRequestError(constructRequestError(SERVICEEXCEPTION, ex.getErrcode(), ex.getErrmsg(),
-					ex.getErrvar().toString()));
+			 String errorMessage = "";
+			    if (ex.getErrvar() != null && ex.getErrvar().length > 0) {
+				errorMessage = ex.getErrvar()[0];
+			    }
+			    responseWrapperDTO.setRequestError(
+				    constructRequestError(SERVICEEXCEPTION, ex.getErrcode(), ex.getErrmsg(), errorMessage));
+
 		} catch (Exception ex) {
 			LOG.error("###PROVISION### Error in Validation : " + ex);
-			responseWrapperDTO.setHttpStatus(Status.BAD_REQUEST);
 			responseWrapperDTO.setRequestError(constructRequestError(SERVICEEXCEPTION, ServiceError.SERVICE_ERROR_OCCURED, null));
 		}
 
@@ -81,6 +85,12 @@ public class NewProvisioningService extends AbstractRequestHandler<ProvisioningS
 
 	@Override
 	protected Returnable process(ProvisioningServicesRequestWrapperDTO extendedRequestDTO) throws Exception {
+		
+		if (responseWrapperDTO.getRequestError() != null) {
+			responseWrapperDTO.setHttpStatus(Status.BAD_REQUEST);
+			return responseWrapperDTO;
+		}
+		
 		try{
 			ProvisionAllService provisionAllService = new ProvisionAllService();
 			
@@ -90,6 +100,8 @@ public class NewProvisioningService extends AbstractRequestHandler<ProvisioningS
 			provisionAllService.setServiceType(serviceDetail.getServiceType());
 			provisionAllService.setDescription(serviceDetail.getDescription());
 			provisionAllService.setServiceCharge(serviceDetail.getServiceCharge());
+			provisionAllService.setTag(serviceDetail.getTag());
+			provisionAllService.setValue(serviceDetail.getValue());
 			provisionAllService.setUser(extendedRequestDTO.getUser());
 			
 			List<ProvisionAllService> serviceList = provisioningDao.getProvisionServices(provisionAllService.getUser().getId());
@@ -103,8 +115,11 @@ public class NewProvisioningService extends AbstractRequestHandler<ProvisioningS
 			}
 			if(!serviceCodes.contains(provisionAllService.getServiceCode()) && !serviceNames.contains(provisionAllService.getServiceName())){
 				provisioningDao.saveProvisionService(provisionAllService);
+				
+				CommonSuccessResponse success = new CommonSuccessResponse();
+				success.setStatus("Service added Successfully!!!");
+				responseWrapperDTO.setMessage(success);
 				responseWrapperDTO.setHttpStatus(Response.Status.OK);
-				responseWrapperDTO.setStatus("Successful");
 			}else{
 				LOG.info("Already exist service");
 				responseWrapperDTO.setHttpStatus(Response.Status.BAD_REQUEST);

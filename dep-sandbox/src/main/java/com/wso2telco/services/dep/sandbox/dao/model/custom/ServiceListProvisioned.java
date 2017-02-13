@@ -19,15 +19,28 @@ package com.wso2telco.services.dep.sandbox.dao.model.custom;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 /**
  * 
  * @author WSO2Telco
  *
  */
+
+@JsonInclude(value=Include.NON_NULL)
 public class ServiceListProvisioned {
 
 	/** The outer service info list **/
 	private List<ServiceInfoListProvisionedDTO> serviceInfo = new ArrayList<>();
+	
+	private String onBehalfOf;
+
+	private String purchaseCategoryCode;
+
+	private String requestIdentifier;
+
+	private String responseIdentifier;
 
 	private String resourceURL;
 
@@ -59,6 +72,40 @@ public class ServiceListProvisioned {
 	 */
 	public void setResourceURL(String resourceURL) {
 		this.resourceURL = resourceURL;
+	}
+	
+	
+
+	public String getOnBehalfOf() {
+		return onBehalfOf;
+	}
+
+	public void setOnBehalfOf(String onBehalfOf) {
+		this.onBehalfOf = onBehalfOf;
+	}
+
+	public String getpurchaseCategoryCode() {
+		return purchaseCategoryCode;
+	}
+
+	public void setpurchaseCategoryCode(String purchaseCategoryCode) {
+		this.purchaseCategoryCode = purchaseCategoryCode;
+	}
+
+	public String getRequestIdentifier() {
+		return requestIdentifier;
+	}
+
+	public void setRequestIdentifier(String requestIdentifier) {
+		this.requestIdentifier = requestIdentifier;
+	}
+
+	public String getResponseIdentifier() {
+		return responseIdentifier;
+	}
+
+	public void setResponseIdentifier(String responseIdentifier) {
+		this.responseIdentifier = responseIdentifier;
 	}
 
 	/**

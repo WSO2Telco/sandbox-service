@@ -44,7 +44,11 @@ public class ProvisionRequestBean {
 		
 		private String clientReferenceCode;
 		
-		private CallbackReference callbackReference;
+		private String onBehalfOf;
+
+		private String purchaseCategoryCode;
+		
+		private RequestCallbackReference callbackReference;
 
 		/**
 		 * @return the serviceCode
@@ -58,6 +62,21 @@ public class ProvisionRequestBean {
 		 */
 		public void setServiceCode(String serviceCode) {
 			this.serviceCode = serviceCode;
+		}
+
+		/**
+		 * @return the serviceName
+		 */
+		public String getServiceName() {
+			return serviceName;
+		}
+
+		/**
+		 * @param serviceName
+		 *            the serviceName to set
+		 */
+		public void setServiceName(String serviceName) {
+			this.serviceName = serviceName;
 		}
 
 		/**
@@ -87,40 +106,42 @@ public class ProvisionRequestBean {
 		public void setClientReferenceCode(String clientReferenceCode) {
 			this.clientReferenceCode = clientReferenceCode;
 		}
+		
+		public String getOnBehalfOf() {
+			return onBehalfOf;
+		}
+
+		public void setOnBehalfOf(String onBehalfOf) {
+			this.onBehalfOf = onBehalfOf;
+		}
+
+		public String getPurchaseCategoryCode() {
+			return purchaseCategoryCode;
+		}
+
+		public void setPurchaseCategoryCode(String purchaseCategoryCode) {
+			this.purchaseCategoryCode = purchaseCategoryCode;
+		}
+
 
 		/**
 		 * @return the callbackReference
 		 */
-		public CallbackReference getCallbackReference() {
+		public RequestCallbackReference getCallbackReference() {
 			return callbackReference;
 		}
 
 		/**
 		 * @param callbackReference the callbackReference to set
 		 */
-		public void setCallbackReference(CallbackReference callbackReference) {
+		public void setCallbackReference(RequestCallbackReference callbackReference) {
 			this.callbackReference = callbackReference;
-		}
-
-		/**
-		 * @return the serviceName
-		 */
-		public String getServiceName() {
-			return serviceName;
-		}
-
-		/**
-		 * @param serviceName
-		 *            the serviceName to set
-		 */
-		public void setServiceName(String serviceName) {
-			this.serviceName = serviceName;
 		}
 
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
 			builder.append("Service Code : " + getServiceCode());
-			builder.append(" Service Name : " + serviceName);
+			builder.append(" Service Name : " + getServiceCode());
 			builder.append(" Client Correlator : " + getClientCorrelator());
 			builder.append(" Client Reference Code : " + getClientReferenceCode());
 

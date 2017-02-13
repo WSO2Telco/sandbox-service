@@ -43,8 +43,12 @@ public class RemoveProvisionRequestBean {
 		private String clientCorrelator;
 
 		private String clientReferenceCode;
+		
+		private String onBehalfOf;
 
-		private CallbackReference callbackReference;
+		private String purchaseCategoryCode;
+
+		private RequestCallbackReference callbackReference;
 
 		/**
 		 * @return the serviceCode
@@ -91,10 +95,25 @@ public class RemoveProvisionRequestBean {
 			this.clientReferenceCode = clientReferenceCode;
 		}
 
+		public String getOnBehalfOf() {
+			return onBehalfOf;
+		}
+
+		public void setOnBehalfOf(String onBehalfOf) {
+			this.onBehalfOf = onBehalfOf;
+		}
+
+		public String getPurchaseCategoryCode() {
+			return purchaseCategoryCode;
+		}
+
+		public void setPurchaseCategoryCode(String purchaseCategoryCode) {
+			this.purchaseCategoryCode = purchaseCategoryCode;
+		}
 		/**
 		 * @return the callbackReference
 		 */
-		public CallbackReference getCallbackReference() {
+		public RequestCallbackReference getCallbackReference() {
 			return callbackReference;
 		}
 
@@ -102,7 +121,7 @@ public class RemoveProvisionRequestBean {
 		 * @param callbackReference
 		 *            to set
 		 */
-		public void setCallbackReference(CallbackReference callbackReference) {
+		public void setCallbackReference(RequestCallbackReference callbackReference) {
 			this.callbackReference = callbackReference;
 		}
 		

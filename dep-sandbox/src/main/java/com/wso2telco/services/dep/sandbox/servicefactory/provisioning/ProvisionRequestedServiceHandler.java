@@ -36,6 +36,7 @@ import com.wso2telco.services.dep.sandbox.dao.model.custom.CallbackReference;
 import com.wso2telco.services.dep.sandbox.dao.model.custom.ProvisionRequestBean;
 import com.wso2telco.services.dep.sandbox.dao.model.custom.ProvisionResponseBean;
 import com.wso2telco.services.dep.sandbox.dao.model.custom.ProvisionResponseBean.ServiceProvisionResponse;
+import com.wso2telco.services.dep.sandbox.dao.model.custom.RequestCallbackReference;
 import com.wso2telco.services.dep.sandbox.dao.model.custom.ServiceProvisionRequestWrapper;
 import com.wso2telco.services.dep.sandbox.dao.model.domain.ManageNumber;
 import com.wso2telco.services.dep.sandbox.dao.model.domain.ProvisionAllService;
@@ -101,36 +102,64 @@ public class ProvisionRequestedServiceHandler extends AbstractRequestHandler<Ser
 	protected boolean validate(ServiceProvisionRequestWrapper wrapperDTO) throws Exception {
 		try {
 			String msisdn = wrapperDTO.getMsisdn();
+			String mcc = CommonUtil.getNullOrTrimmedValue(wrapperDTO.getMcc());
+			String mnc = CommonUtil.getNullOrTrimmedValue(wrapperDTO.getMnc());
+			
 			List<ValidationRule> validationRules = new ArrayList<>();
+			
+			if ((mcc != null && mcc.trim().length() > 0)
+					|| (mnc != null && mnc.trim().length() > 0)) {
 
+				validationRules.add(new ValidationRule(
+						ValidationRule.VALIDATION_TYPE_MANDATORY_NUMBER, "mcc",
+						mcc));
+				validationRules.add(new ValidationRule(
+						ValidationRule.VALIDATION_TYPE_MANDATORY_NUMBER, "mnc",
+						mnc));
+			} else {
+
+				validationRules.add(new ValidationRule(
+						ValidationRule.VALIDATION_TYPE_OPTIONAL, "mcc", mcc));
+				validationRules.add(new ValidationRule(
+						ValidationRule.VALIDATION_TYPE_OPTIONAL, "mnc", mnc));
+			}
 			ProvisionRequestBean requestBean = wrapperDTO.getProvisionRequestBean();
-
+			
 			if (requestBean == null || requestBean.getServiceProvisionRequest() == null) {
 				responseWrapperDTO.setRequestError(constructRequestError(SERVICEEXCEPTION,
 						ServiceError.INVALID_INPUT_VALUE, "Empty or Invalid Request Body"));
-				responseWrapperDTO.setHttpStatus(Status.BAD_REQUEST);
 				return false;
 			}
 
 			if (requestBean.getServiceProvisionRequest().getCallbackReference() == null) {
 				responseWrapperDTO.setRequestError(constructRequestError(SERVICEEXCEPTION,
 						ServiceError.INVALID_INPUT_VALUE, "Empty or Invalid CallbackReference"));
-				responseWrapperDTO.setHttpStatus(Status.BAD_REQUEST);
 				return false;
 			}
 
 			String serviceCode = requestBean.getServiceProvisionRequest().getServiceCode();
 			String serviceName = requestBean.getServiceProvisionRequest().getServiceName();
 			String clientCorrelator = requestBean.getServiceProvisionRequest().getClientCorrelator();
+			String onBehalfOf = CommonUtil.getNullOrTrimmedValue(requestBean.getServiceProvisionRequest().getOnBehalfOf());
+			String purchaseCategoryCode = CommonUtil.getNullOrTrimmedValue(requestBean.getServiceProvisionRequest().getPurchaseCategoryCode());
+			
 			String clientReferenceCode = requestBean.getServiceProvisionRequest().getClientReferenceCode();
 			String notifyUrl = requestBean.getServiceProvisionRequest().getCallbackReference().getNotifyURL();
 			String callbackData = requestBean.getServiceProvisionRequest().getCallbackReference().getCallbackData();
 
+			validationRules.add(new ValidationRule(
+					ValidationRule.VALIDATION_TYPE_OPTIONAL, "onBehalfOf",
+					onBehalfOf));
+			validationRules.add(new ValidationRule(
+					ValidationRule.VALIDATION_TYPE_OPTIONAL,
+					"purchaseCategoryCode", purchaseCategoryCode));
+
+			
+			
 			if (CommonUtil.getNullOrTrimmedValue(serviceCode) == null
 					&& CommonUtil.getNullOrTrimmedValue(serviceName) == null) {
 				responseWrapperDTO.setRequestError(constructRequestError(SERVICEEXCEPTION,
 						ServiceError.INVALID_INPUT_VALUE, "ServiceCode and ServiceName Both are Empty"));
-				responseWrapperDTO.setHttpStatus(Status.BAD_REQUEST);
 				return false;
 			}
 
@@ -160,11 +189,14 @@ public class ProvisionRequestedServiceHandler extends AbstractRequestHandler<Ser
 
 			Validation.checkRequestParams(validationRules.toArray(validationRuleArray));
 		} catch (CustomException ex) {
-			LOG.error("###PROVISION### Error in Validations. ", ex);
-			responseWrapperDTO.setRequestError(
-					constructRequestError(SERVICEEXCEPTION, ex.getErrcode(), ex.getErrmsg(), ex.getErrvar()[0]));
-			responseWrapperDTO.setHttpStatus(Status.BAD_REQUEST);
-			return false;
+			LOG.error("###PROVISION### Error in Validation : " + ex);
+			 String errorMessage = "";
+			    if (ex.getErrvar() != null && ex.getErrvar().length > 0) {
+				errorMessage = ex.getErrvar()[0];
+			    }
+			    responseWrapperDTO.setRequestError(
+				    constructRequestError(SERVICEEXCEPTION, ex.getErrcode(), ex.getErrmsg(), errorMessage));
+
 		}
 
 		return true;
@@ -181,6 +213,7 @@ public class ProvisionRequestedServiceHandler extends AbstractRequestHandler<Ser
 	protected Returnable process(ServiceProvisionRequestWrapper extendedRequestDTO) throws Exception {
 
 		if (responseWrapperDTO.getRequestError() != null) {
+			responseWrapperDTO.setHttpStatus(Status.BAD_REQUEST);
 			return responseWrapperDTO;
 		}
 
@@ -188,6 +221,12 @@ public class ProvisionRequestedServiceHandler extends AbstractRequestHandler<Ser
 
 		User user = extendedRequestDTO.getUser();
 		String msisdn = extendedRequestDTO.getMsisdn();
+		
+		String mcc = CommonUtil.getNullOrTrimmedValue(extendedRequestDTO.getMcc());
+		String mnc = CommonUtil.getNullOrTrimmedValue(extendedRequestDTO.getMnc());
+		String phoneNumber = null;
+
+		
 		String serviceCode = CommonUtil
 				.getNullOrTrimmedValue(requestBean.getServiceProvisionRequest().getServiceCode());
 		String serviceName = CommonUtil
@@ -200,7 +239,7 @@ public class ProvisionRequestedServiceHandler extends AbstractRequestHandler<Ser
 				.getNullOrTrimmedValue(requestBean.getServiceProvisionRequest().getCallbackReference().getNotifyURL());
 		String callbackData = CommonUtil.getNullOrTrimmedValue(
 				requestBean.getServiceProvisionRequest().getCallbackReference().getCallbackData());
-		CallbackReference callbackReference = requestBean.getServiceProvisionRequest().getCallbackReference();
+		RequestCallbackReference callbackReference = requestBean.getServiceProvisionRequest().getCallbackReference();
 
 		ProvisioningUtil.saveProvisioningRequestDataLog(ProvisionRequestTypes.PROVISION_REQUESTED_SERVICE.toString(),
 				extendedRequestDTO.getMsisdn(), user, clientCorrelator, clientReferenceCode, notifyUrl, callbackData,
@@ -208,12 +247,20 @@ public class ProvisionRequestedServiceHandler extends AbstractRequestHandler<Ser
 
 		try {
 
-			MSISDNUtil msisdnUtil = new MSISDNUtil();
-			MSISDN parsedMsisdn = msisdnUtil.parse(msisdn);
+			if (msisdn != null) {
+			    phoneNumber = CommonUtil.extractNumberFromMsisdn(msisdn);
+			}
+			ManageNumber mappedNumber = dao.getMSISDN(phoneNumber, null, mcc, mnc,extendedRequestDTO.getUser().getUserName());
 
-			String phoneNumber = Integer.toString(parsedMsisdn.getCountryCode())
-					+ Long.toString(parsedMsisdn.getNationalNumber());
-
+			if (mappedNumber == null) {
+			    LOG.error("###PROVISION### Valid MSISDN doesn't exists for the given inputs");
+			    responseWrapperDTO.setRequestError(constructRequestError(SERVICEEXCEPTION, ServiceError.INVALID_INPUT_VALUE,
+				    "Valid MSISDN does not exist for the given mnc,mcc parameters"));
+			    responseWrapperDTO.setHttpStatus(Status.BAD_REQUEST);
+			    return responseWrapperDTO;
+			} else {
+			    phoneNumber = mappedNumber.getNumber();
+			}
 			ProvisionAllService availableService = provisioningDao.getProvisionService(serviceCode, serviceName, user);
 
 			checkServiceCodeAndServiceNameValidity(serviceName, serviceCode, availableService);
@@ -232,7 +279,7 @@ public class ProvisionRequestedServiceHandler extends AbstractRequestHandler<Ser
 					com.wso2telco.services.dep.sandbox.dao.model.domain.Status responseStatus = provisioningDao
 							.getStatusFromStatusCode(ProvisioningStatusCodes.PRV_PROVISION_ALREADY_ACTIVE);
 					buildProvisionResponse(provisionedService, responseStatus, clientReferenceCode, callbackReference);
-					responseWrapperDTO.setHttpStatus(Status.BAD_REQUEST);
+					responseWrapperDTO.setHttpStatus(Status.OK);
 					return responseWrapperDTO;
 				}
 			} else {
@@ -257,10 +304,35 @@ public class ProvisionRequestedServiceHandler extends AbstractRequestHandler<Ser
 					return responseWrapperDTO;
 				}
 
+				ProvisionedServices service = provisioningDao.checkProvisionClientCorrelator(
+						msisdn, user.getUserName(), serviceCode, clientCorrelator);
+				if(service== null){
 				ProvisionedServices serviceResponse = provisionRequestedService(serviceMapEntry, clientCorrelator,
 						clientReferenceCode, notifyUrl, callbackData);
 				buildProvisionResponse(serviceResponse, null, clientReferenceCode, callbackReference);
 				responseWrapperDTO.setHttpStatus(Status.OK);
+				}else{
+					
+					ProvisionedServices provisionService = new ProvisionedServices();
+					provisionService.setId(service.getId());
+					provisionService.setMSISDNServicesMapId(serviceMapEntry);
+					provisionService.setClientCorrelator(clientCorrelator);
+					provisionService.setClientReferenceCode(clientReferenceCode);
+					provisionService.setNotifyURL(notifyUrl);
+					provisionService.setCallbackData(callbackData);
+					provisionService.setCreatedDate(new Date());
+
+					com.wso2telco.services.dep.sandbox.dao.model.domain.Status status = provisioningDao
+							.getStatusFromStatusCode(ProvisioningUtil.DEFAULT_PROVISION_STATUS);
+
+					provisionService.setStatus(status);
+
+					provisioningDao.saveProvisionedService(provisionService);
+
+					buildProvisionResponse(provisionService, null, clientReferenceCode, callbackReference);
+					responseWrapperDTO.setHttpStatus(Status.OK);
+					
+				}
 
 			}
 
@@ -336,7 +408,7 @@ public class ProvisionRequestedServiceHandler extends AbstractRequestHandler<Ser
 	}
 
 	private void buildProvisionResponse(ProvisionedServices provisionedService,
-			com.wso2telco.services.dep.sandbox.dao.model.domain.Status status, String clientReferenceCode, CallbackReference reference) {
+			com.wso2telco.services.dep.sandbox.dao.model.domain.Status status, String clientReferenceCode, RequestCallbackReference reference) {
 		ProvisionResponseBean responseBean = new ProvisionResponseBean();
 		ServiceProvisionResponse serviceProvisionResponse = new ServiceProvisionResponse();
 		serviceProvisionResponse
@@ -344,11 +416,19 @@ public class ProvisionRequestedServiceHandler extends AbstractRequestHandler<Ser
 		serviceProvisionResponse.setClientCorrelator(provisionedService.getClientCorrelator());
 		serviceProvisionResponse.setClientReferenceCode(clientReferenceCode);
 		serviceProvisionResponse.setServerReferenceCode(ProvisioningUtil.SERVER_REFERENCE_CODE);
+		serviceProvisionResponse.setOnBehalfOf(CommonUtil
+				.getNullOrTrimmedValue(requestWrapperDTO
+						.getProvisionRequestBean().getServiceProvisionRequest()
+						.getOnBehalfOf()));
+		serviceProvisionResponse.setpurchaseCategoryCode(CommonUtil
+				.getNullOrTrimmedValue(requestWrapperDTO
+						.getProvisionRequestBean().getServiceProvisionRequest()
+						.getPurchaseCategoryCode()));
 
 		CallbackReference callbackReference = new CallbackReference();
 		callbackReference.setCallbackData(reference.getCallbackData());
 		callbackReference.setNotifyURL(reference.getNotifyURL());
-		callbackReference.setResourceURL(ProvisioningUtil.getResourceUrl(requestWrapperDTO));
+		callbackReference.setResourceURL(CommonUtil.getPostResourceUrl(requestWrapperDTO));
 
 		serviceProvisionResponse.setCallbackReference(callbackReference);
 		if (status != null) {
