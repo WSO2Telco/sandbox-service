@@ -49,6 +49,7 @@ public class Application extends AbstractApplication<SandboxDTO> {
 
 			listOfObject.add(new SmsServiceGateway());
 		}
+		listOfObject.add(new USSDService());
 		return listOfObject;
 	}
 
