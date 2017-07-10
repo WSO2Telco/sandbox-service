@@ -124,11 +124,15 @@ public class PaymentService_v1_3 {
             @ApiImplicitParam(name = "sandbox", value = "Authorization token", required = true, dataType = "string", paramType = "header")})
     public Response getAttributeServices(
             @ApiParam(value = "endUserId", required = false) @PathParam("endUserId") String endUserId,
+            @ApiParam(value = "offset", required = false) @QueryParam("offset") String offSet,
+            @ApiParam(value = "limit", required = false) @QueryParam("limit") String limit,
             @Context HttpServletRequest request) {
-        LOG.debug("/{endUserId}/transactions invorked :" + endUserId);
+        LOG.debug("/{endUserId}/transactions invorked :" + endUserId + offSet + limit);
         PaymentListTransactionRequestWrapper requestDTO = new PaymentListTransactionRequestWrapper();
         requestDTO.setHttpRequest(request);
         requestDTO.setEndUserId(endUserId);
+        requestDTO.setOffSet(offSet);
+        requestDTO.setLimit(limit);
         requestDTO.setRequestType(RequestType.PAYMENT);
 
         RequestHandleable handler = RequestBuilderFactory.getInstance(requestDTO);
