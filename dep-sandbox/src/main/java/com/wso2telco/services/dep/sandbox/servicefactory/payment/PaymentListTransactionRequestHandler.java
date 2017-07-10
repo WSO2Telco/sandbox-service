@@ -74,10 +74,15 @@ public class PaymentListTransactionRequestHandler extends AbstractRequestHandler
     protected boolean validate(PaymentListTransactionRequestWrapper wrapperDTO) throws Exception {
 
         String endUserId = CommonUtil.getNullOrTrimmedValue(wrapperDTO.getEndUserId());
-
+        String offset = CommonUtil.getNullOrTrimmedValue(wrapperDTO.getOffSet());
+        String limit = CommonUtil.getNullOrTrimmedValue(wrapperDTO.getLimit());
         try {
-            ValidationRule[] validationRules = {new ValidationRule(
-                    ValidationRule.VALIDATION_TYPE_MANDATORY_TEL_END_USER_ID, "endUserId", endUserId)};
+            ValidationRule[] validationRules = {
+                    new ValidationRule(ValidationRule.VALIDATION_TYPE_MANDATORY_TEL_END_USER_ID, "endUserId", endUserId),
+                    new ValidationRule(ValidationRule.VALIDATION_TYPE_OPTIONAL_INT_GE_ZERO, "offset", offset ),
+                    new ValidationRule(ValidationRule.VALIDATION_TYPE_OPTIONAL_INT_GE_ZERO, "limit", limit)
+            };
+
 
             Validation.checkRequestParams(validationRules);
         } catch (CustomException ex) {
@@ -103,6 +108,10 @@ public class PaymentListTransactionRequestHandler extends AbstractRequestHandler
             String msisdn = extendedRequestDTO.getEndUserId();
             String endUserId = getLastMobileNumber(msisdn);
             Integer userId = extendedRequestDTO.getUser().getId();
+            Integer offset = CommonUtil
+                    .convertStringToInteger(extendedRequestDTO.getOffSet());
+            Integer limit = CommonUtil
+                    .convertStringToInteger(extendedRequestDTO.getLimit());
 
             String serviceCallPayment = ServiceName.ChargeUser.toString();
             String serviceCallRefund = ServiceName.RefundUser.toString();
@@ -123,7 +132,9 @@ public class PaymentListTransactionRequestHandler extends AbstractRequestHandler
 
             PaymentListTransactionResponseBean paymentTransaction = new PaymentListTransactionResponseBean();
             List<JsonNode> listNodes = new ArrayList<JsonNode>();
-            List<MessageLog> responses = loggingDAO.getMessageLogs(userId, list, "msisdn", "tel:+" + endUserId, null, null);
+            List<MessageLog> responses = loggingDAO.getResponseLists(userId, list, "msisdn", "tel:+" + endUserId, null, null, offset, limit
+
+            );
 
             String jsonString = null;
 
