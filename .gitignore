@@ -22,5 +22,5 @@ target
 *.ipr
 .idea
 log
-dep-sanbox/log
+dep-sanbox/log/
 
