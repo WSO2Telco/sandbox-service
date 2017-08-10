@@ -21,6 +21,10 @@ public class PaymentListTransactionRequestWrapper extends RequestDTO {
 
 	private String endUserId;
 
+	private String offSet;
+
+	private String limit;
+
 	public String getEndUserId() {
 		return endUserId;
 	}
@@ -29,4 +33,19 @@ public class PaymentListTransactionRequestWrapper extends RequestDTO {
 		this.endUserId = endUserId;
 	}
 
+	public String getOffSet() {
+		return offSet;
+	}
+
+	public void setOffSet(String offSet) {
+		this.offSet = offSet;
+	}
+
+	public String getLimit() {
+		return limit;
+	}
+
+	public void setLimit(String limit) {
+		this.limit = limit;
+	}
 }
