@@ -110,7 +110,8 @@ public class HibernateLoggingDao extends HibernateAbstractDAO implements Logging
 	}
 
 	@Override
-	public List<MessageLog> getResponseLists(int userid, List<Integer> serviceNameIds, String ref, String val, Date startTimeStamp, Date endTimeStamp, int offSet, int limit) throws Exception {
+	public List<MessageLog> getResponseLists(int userid, List<Integer> serviceNameIds,
+											 String ref, String val, Date startTimeStamp, Date endTimeStamp, int offSet, int limit, int type) throws Exception {
 		Session session = getSession();
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
 		List<MessageLog> messageLogs = new ArrayList<MessageLog>();
@@ -138,6 +139,11 @@ public class HibernateLoggingDao extends HibernateAbstractDAO implements Logging
 				parameterMap.put("value", value);
 			}
 
+			if (type != 0) {
+				hqlQueryBuilder.append(" AND ml.type = :type");
+				parameterMap.put("type", type);
+			}
+
 			if(startTimeStamp != null && endTimeStamp != null){
 				hqlQueryBuilder.append(" AND ml.messageTimestamp between :startTimeStamp and :endTimeStamp");
 				parameterMap.put("startTimeStamp", startTimeStamp);
@@ -158,7 +164,7 @@ public class HibernateLoggingDao extends HibernateAbstractDAO implements Logging
 			Query query = session.createQuery(hqlQueryBuilder.toString());
 
 			if (offSet > 0) {
-				query.setFirstResult(offSet);
+				query.setFirstResult(offSet-1);
 			}
 
 			if (limit > 0) {

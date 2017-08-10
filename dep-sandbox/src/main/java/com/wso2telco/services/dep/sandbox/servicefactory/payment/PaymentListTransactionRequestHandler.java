@@ -128,13 +128,11 @@ public class PaymentListTransactionRequestHandler extends AbstractRequestHandler
 
             JSONObject object = new JSONObject();
             object.put("endUserId", msisdn);
-
+            int type = MessageType.Response.getValue();
 
             PaymentListTransactionResponseBean paymentTransaction = new PaymentListTransactionResponseBean();
             List<JsonNode> listNodes = new ArrayList<JsonNode>();
-            List<MessageLog> responses = loggingDAO.getResponseLists(userId, list, "msisdn", "tel:+" + endUserId, null, null, offset, limit
-
-            );
+            List<MessageLog> responses = loggingDAO.getResponseLists(userId, list, "msisdn", "tel:+" + endUserId, null, null, offset, limit, type);
 
             String jsonString = null;
 

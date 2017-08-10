@@ -13,6 +13,6 @@ public interface LoggingDAO {
 	
 	public List<MessageLog> getMessageLogs(int userid, List<Integer> serviceNameIds, String reference, String value, Date startTimeStamp, Date endTimeStamp) throws Exception;
 
-	public List<MessageLog> getResponseLists(int userid, List<Integer> serviceNameIds, String reference, String value, Date startTimeStamp, Date endTimeStamp, int offSet, int limit) throws Exception;
+	public List<MessageLog> getResponseLists(int userid, List<Integer> serviceNameIds, String reference, String value, Date startTimeStamp, Date endTimeStamp, int offSet, int limit, int type) throws Exception;
 
 }
