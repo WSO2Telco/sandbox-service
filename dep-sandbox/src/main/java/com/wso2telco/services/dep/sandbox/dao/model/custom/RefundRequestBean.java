@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright (c) 2015-2017, WSO2.Telco Inc. (http://www.wso2telco.com)
+ *
+ * All Rights Reserved. WSO2.Telco Inc. licences this file to you under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package com.wso2telco.services.dep.sandbox.dao.model.custom;
 
 public class RefundRequestBean {
@@ -17,25 +32,24 @@ public class RefundRequestBean {
 
 	public static class RefundRequest{
 		
-		private double amount;
-		
+
 		private String clientCorrelator;
+
+		private String msisdn;
 		
+		private String originalServerReferenceCode;
+
 		private String reasonForRefund;
-		
+
+		private String refundAmount;
+
+		private PaymentAmountWithTax paymentAmount;
+
+		private String referenceCode;
+
 		private String merchantIdentification;
-		
-		private String serverTransactionReference;
-		
-		private CallbackReference receiptRequest;
 
-		public double getAmount() {
-			return amount;
-		}
-
-		public void setAmount(double amount) {
-			this.amount = amount;
-		}
+		private ReceiptRequest receiptRequest;
 
 		public String getClientCorrelator() {
 			return clientCorrelator;
@@ -43,6 +57,23 @@ public class RefundRequestBean {
 
 		public void setClientCorrelator(String clientCorrelator) {
 			this.clientCorrelator = clientCorrelator;
+		}
+
+
+		public String getMsisdn() {
+			return msisdn;
+		}
+
+		public void setMsisdn(String msisdn) {
+			this.msisdn = msisdn;
+		}
+
+		public String getOriginalServerReferenceCode() {
+			return originalServerReferenceCode;
+		}
+
+		public void setOriginalServerReferenceCode(String originalServerReferenceCode) {
+			this.originalServerReferenceCode = originalServerReferenceCode;
 		}
 
 		public String getReasonForRefund() {
@@ -53,29 +84,66 @@ public class RefundRequestBean {
 			this.reasonForRefund = reasonForRefund;
 		}
 
-		public String getMerchantIdentification() {
-			return merchantIdentification;
+		public String getRefundAmount() {
+			return refundAmount;
 		}
 
-		public void setMerchantIdentification(String merchantIdentification) {
-			this.merchantIdentification = merchantIdentification;
+		public void setRefundAmount(String refundAmount) {
+			this.refundAmount = refundAmount;
 		}
 
-		public String getServerTransactionReference() {
-			return serverTransactionReference;
+
+		public PaymentAmountWithTax getPaymentAmount() {
+			return paymentAmount;
 		}
 
-		public void setServerTransactionReference(String serverTransactionReference) {
-			this.serverTransactionReference = serverTransactionReference;
+		public void setPaymentAmount(PaymentAmountWithTax paymentAmount) {
+			this.paymentAmount = paymentAmount;
 		}
 
-		public CallbackReference getReceiptRequest() {
+		public String getReferenceCode() {
+			return referenceCode;
+		}
+
+		public void setReferenceCode(String referenceCode) {
+			this.referenceCode = referenceCode;
+		}
+
+
+        public String getMerchantIdentification() {
+            return merchantIdentification;
+        }
+
+        public void setMerchantIdentification(String merchantIdentification) {
+            this.merchantIdentification = merchantIdentification;
+        }
+
+		public ReceiptRequest getReceiptRequest() {
 			return receiptRequest;
 		}
 
-		public void setReceiptRequest(CallbackReference receiptRequest) {
+		public void setReceiptRequest(ReceiptRequest receiptRequest) {
 			this.receiptRequest = receiptRequest;
 		}
+
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("Client Correlator : " + getClientCorrelator());
+			builder.append("msisdn : " + getMsisdn());
+			builder.append("OriginalServerReferenceCode : " +getOriginalServerReferenceCode());
+			builder.append("reasonForRefund : " + getReasonForRefund());
+			builder.append("refundAmount : " + getPaymentAmount());
+			builder.append("callbackData : " +receiptRequest.getCallbackData());
+			builder.append("notifyURL : "+receiptRequest.getNotifyURL());
+			builder.append("merchantIdentification : "+getMerchantIdentification());
+
+			if (getPaymentAmount() != null) {
+				builder.append(" " + getPaymentAmount().toString());
+			}
+
+			return builder.toString();
+		}
+
 		
 	}
 

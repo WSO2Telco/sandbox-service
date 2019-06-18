@@ -58,8 +58,10 @@ public class CreditApplyRequestHandler extends AbstractRequestHandler<CreditAppl
 	private CreditApplyResponseWrapper responseWrapperDTO;
 	private Integer correlatorid;
 	Integer clientCorrelatorid ;
+	private CreditApplyResponseWrapper creditApplyResponseWrapper;
 	
 	final String TYPE_MONEY = "money";
+	final String TYPE_SMS = "sms";
 	final String NUMBERS_TABLE = "numbers";
 	final String CREDIT_REQUEST = "creditApplyRequest";
 	final String MSISDN = "msisdn";
@@ -136,7 +138,7 @@ public class CreditApplyRequestHandler extends AbstractRequestHandler<CreditAppl
 				} catch (CustomException ex) {
 					LOG.error("###CREDIT### Error in Validation : " + ex);
 					responseWrapperDTO.setRequestError(constructRequestError(SERVICEEXCEPTION, ex.getErrcode(),
-							ex.getErrmsg(), wrapperDTO.getMsisdn()));
+							ex.getErrmsg(), ex.getErrvar()[0]));
 					responseWrapperDTO.setHttpStatus(javax.ws.rs.core.Response.Status.BAD_REQUEST);
 				}
 				return true;
@@ -189,7 +191,8 @@ public class CreditApplyRequestHandler extends AbstractRequestHandler<CreditAppl
 		String callbackData = CommonUtil.getNullOrTrimmedValue(request.getReceiptRequest().getCallbackData());
 		String referenceCode = CommonUtil.getNullOrTrimmedValue(request.getReferenceCode());
 
-		try {	
+		try {
+
 			String clientCorrelatorAttribute = AttributeName.clientCorrelator.toString();
 			Integer userId = extendedRequestDTO.getUser().getId();
 			 String userName = extendedRequestDTO.getUser().getUserName();
@@ -200,7 +203,7 @@ public class CreditApplyRequestHandler extends AbstractRequestHandler<CreditAppl
 				 ManageNumber manageNumber = numberDao.getNumber(msisdn, userName);
 				 if(ownerId == manageNumber.getId()){
 					//send the already sent response
-					AttributeValues applyCreditResponse = creditDAO.getTransactionValue(msisdn,values.getAttributeValueId() ,AttributeName.applyCredit.toString());
+					AttributeValues applyCreditResponse = creditDAO.getTransactionValue(msisdn,values.getAttributeValueId() ,AttributeName.applyCredit.toString(), ServiceName.ApplyCredit.toString());
 					CreditApplyResponseBean bean = new CreditApplyResponseBean();
 
 					ObjectMapper mapper = new ObjectMapper();
@@ -219,7 +222,16 @@ public class CreditApplyRequestHandler extends AbstractRequestHandler<CreditAppl
 						return responseWrapperDTO;
 					}
 				 }
-			}		
+			}
+            //check SMS is integer or not
+			if(type.toLowerCase().equals(TYPE_SMS)){
+				if (!((amount == Math.floor(amount)) && !Double.isInfinite(amount))) {
+					responseWrapperDTO.setRequestError(constructRequestError(SERVICEEXCEPTION,
+							ServiceError.INVALID_INPUT_VALUE, "SMS Should be a Integer Number"));
+					responseWrapperDTO.setHttpStatus(Status.BAD_REQUEST);
+					return responseWrapperDTO;
+				}
+			}
 			//check reference code duplication
 			String referenceCodeAttribute =  AttributeName.referenceCodeCredit.toString();
 			AttributeValues value =	creditDAO.checkDuplication(userId, serviceCreditApply, referenceCode, referenceCodeAttribute);
@@ -245,7 +257,7 @@ public class CreditApplyRequestHandler extends AbstractRequestHandler<CreditAppl
 					clientCorrelatorid = saveClientCorrelator(msisdn, clientCorrelator, userName);				
 					saveTransaction(responseBean);
 					}
-					responseWrapperDTO.setHttpStatus(Response.Status.OK);
+					responseWrapperDTO.setHttpStatus(Response.Status.CREATED);
 					return responseWrapperDTO;
 					
 				} else {
@@ -270,7 +282,7 @@ public class CreditApplyRequestHandler extends AbstractRequestHandler<CreditAppl
 					clientCorrelatorid = saveClientCorrelator(msisdn, clientCorrelator,userName);				
 					saveTransaction(responseBean);
 					}			
-					responseWrapperDTO.setHttpStatus(Response.Status.OK);
+					responseWrapperDTO.setHttpStatus(Response.Status.CREATED);
 					return responseWrapperDTO;
 				} else {
 					attributeValues = new AttributeValues();
@@ -285,7 +297,7 @@ public class CreditApplyRequestHandler extends AbstractRequestHandler<CreditAppl
 					clientCorrelatorid = saveClientCorrelator(msisdn, clientCorrelator,userName);				
 					saveTransaction(responseBean);
 					}
-					responseWrapperDTO.setHttpStatus(Response.Status.OK);
+					responseWrapperDTO.setHttpStatus(Response.Status.CREATED);
 					return responseWrapperDTO;
 				}
 			}
@@ -295,7 +307,7 @@ public class CreditApplyRequestHandler extends AbstractRequestHandler<CreditAppl
 			buildJsonResponseBody(amount, type, clientCorrelator, merchantIdentification, reasonForCredit,
 					CreditStatusCodes.ERROR.toString(), callbackData, notifyURL, referenceCode, serverReferenceCode);
 			responseWrapperDTO
-					.setRequestError(constructRequestError(SERVICEEXCEPTION, ServiceError.SERVICE_ERROR_OCCURED, null));
+					.setRequestError(constructRequestError(SERVICEEXCEPTION, ServiceError.SERVICE_ERROR_OCCURED, "Error in processing credit service request"));
 			responseWrapperDTO.setHttpStatus(Status.BAD_REQUEST);
 			return responseWrapperDTO;
 		}

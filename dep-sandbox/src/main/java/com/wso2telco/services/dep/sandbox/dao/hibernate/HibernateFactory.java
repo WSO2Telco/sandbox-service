@@ -33,6 +33,10 @@ public class HibernateFactory {
 	public HibernateWalletDAO getHibernateWalletDAO() {
 		return new HibernateWalletDAO();
 	}
+
+	public HibernatePaymentDAO getHibernatePaymentDAO() {
+		return new HibernatePaymentDAO();
+	}
 	
 	public HibernateLoggingDao getHibernateLoggingDao() {
 		return new HibernateLoggingDao();
@@ -40,5 +44,9 @@ public class HibernateFactory {
 	
 	public HibernateCreditDAO getHibernateCreditDAO() {
 		return new HibernateCreditDAO();
+	}
+
+	public HibernateUSSDDAO getHibernateUSSDDAO() {
+		return new HibernateUSSDDAO();
 	}
 }
