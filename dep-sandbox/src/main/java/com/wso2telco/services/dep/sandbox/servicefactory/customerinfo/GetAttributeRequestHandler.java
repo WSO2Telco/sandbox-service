@@ -6,9 +6,21 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.wso2telco.services.dep.sandbox.dao.model.custom.Customer;
+import com.wso2telco.services.dep.sandbox.dao.model.custom.CustomerInfoDTO;
+import com.wso2telco.services.dep.sandbox.dao.model.domain.*;
+import com.wso2telco.services.dep.sandbox.servicefactory.MessageProcessStatus;
+import com.wso2telco.services.dep.sandbox.servicefactory.MessageType;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONObject;
+
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,9 +32,6 @@ import com.wso2telco.services.dep.sandbox.dao.CustomerInfoDAO;
 import com.wso2telco.services.dep.sandbox.dao.DaoFactory;
 import com.wso2telco.services.dep.sandbox.dao.model.custom.ListCustomerInfoAttributesDTO;
 import com.wso2telco.services.dep.sandbox.dao.model.custom.ListCustomerInfoDTO;
-import com.wso2telco.services.dep.sandbox.dao.model.domain.APIServiceCalls;
-import com.wso2telco.services.dep.sandbox.dao.model.domain.APITypes;
-import com.wso2telco.services.dep.sandbox.dao.model.domain.AttributeValues;
 import com.wso2telco.services.dep.sandbox.service.SandboxDTO;
 import com.wso2telco.services.dep.sandbox.servicefactory.AbstractRequestHandler;
 import com.wso2telco.services.dep.sandbox.servicefactory.Returnable;
@@ -30,6 +39,9 @@ import com.wso2telco.services.dep.sandbox.util.AttributeMetaInfo.Attribute;
 import com.wso2telco.services.dep.sandbox.util.CommonUtil;
 import com.wso2telco.services.dep.sandbox.util.MessageLogHandler;
 import com.wso2telco.services.dep.sandbox.util.ServiceName;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.json.simple.parser.JSONParser;
 
 public class GetAttributeRequestHandler extends
 	AbstractRequestHandler<GetAttributeRequestWrapper> {
@@ -39,8 +51,14 @@ public class GetAttributeRequestHandler extends
     private GetAttributeResponseWrapper responseWrapperDTO;
     private static String schemaValues = null;
     private MessageLogHandler logHandler;
+	private  String requestIdentifierCode ;
+	static final String CUSTOMER = "customer";
+	static final String REQUESTIDENTIFIER = "requestIdentifier";
+	static final String MSISDN = "msisdn";
+	static final String IMSI ="imsi";
 
-    {
+
+	{
 	LOG = LogFactory.getLog(GetAttributeRequestHandler.class);
 	customerInfoDao = DaoFactory.getCustomerInfoDAO();
 	dao = DaoFactory.getGenaricDAO();
@@ -68,6 +86,8 @@ public class GetAttributeRequestHandler extends
     protected boolean validate(GetAttributeRequestWrapper wrapperDTO)
 	    throws Exception {
 
+		String duplicateRequestId = null;
+
 	String msisdn = CommonUtil
 		.getNullOrTrimmedValue(wrapperDTO.getMsisdn());
 	String imsi = CommonUtil.getNullOrTrimmedValue(wrapperDTO.getImsi());
@@ -77,9 +97,11 @@ public class GetAttributeRequestHandler extends
 	String onBehalfOf = CommonUtil.getNullOrTrimmedValue(wrapperDTO.getOnBehalfOf());
 	String purchaseCategoryCode = CommonUtil.getNullOrTrimmedValue(wrapperDTO.getPurchaseCategoryCode());
 	String requestIdentifier = CommonUtil.getNullOrTrimmedValue(wrapperDTO.getRequestIdentifier());
-	
+	APITypes apiTypes = dao.getAPIType(wrapperDTO.getRequestType().toString().toLowerCase());
+	APIServiceCalls apiServiceCalls = dao.getServiceCall(apiTypes.getId(), ServiceName.GetAttribute.toString().toLowerCase());
 
-	List<ValidationRule> validationRulesList = new ArrayList<>();
+
+		List<ValidationRule> validationRulesList = new ArrayList<>();
 
 	try {
 	    if (msisdn == null && imsi == null) {
@@ -95,7 +117,6 @@ public class GetAttributeRequestHandler extends
 		}
 	   
 	    validationRulesList.add(new ValidationRule(ValidationRule.VALIDATION_TYPE_MANDATORY, "schema", schema));
-	  
 	    if (msisdn != null) {
 		validationRulesList.add(new ValidationRule(
 			ValidationRule.VALIDATION_TYPE_OPTIONAL_TEL, "msisdn",
@@ -119,7 +140,7 @@ public class GetAttributeRequestHandler extends
 					ValidationRule.VALIDATION_TYPE_OPTIONAL_INT_GE_ZERO,
 					"mnc", mnc));
 			validationRulesList.add(new ValidationRule(
-					ValidationRule.VALIDATION_TYPE_MANDATORY_INT_GE_ZERO,
+					ValidationRule.VALIDATION_TYPE_OPTIONAL_INT_GE_ZERO,
 					"mcc", mcc));
 		}
     
@@ -128,8 +149,6 @@ public class GetAttributeRequestHandler extends
 	    validationRulesList.add(new ValidationRule(ValidationRule.VALIDATION_TYPE_OPTIONAL, "purchaseCategoryCode",
 				purchaseCategoryCode));
 	    validationRulesList.add(new ValidationRule(ValidationRule.VALIDATION_TYPE_MANDATORY, "requestIdentifier", requestIdentifier));
-
-
 		if (requestIdentifier != null && checkRequestIdentifierSize(requestIdentifier)) {
 
 			validationRulesList.add(new ValidationRule(ValidationRule.VALIDATION_TYPE_MANDATORY, "requestIdentifier",
@@ -183,11 +202,9 @@ public class GetAttributeRequestHandler extends
 	obj.put("mcc",extendedRequestDTO.getMcc());
 	obj.put("mnc",extendedRequestDTO.getMnc());
 	obj.put("userName",extendedRequestDTO.getUser().getUserName());
-	logHandler.saveMessageLog(apiServiceCalls.getApiServiceCallId(), extendedRequestDTO.getUser().getId(), "msisdn", extendedRequestDTO.getMsisdn(), obj);
 	
 	String msisdn = null;
 	ObjectMapper mapper = new ObjectMapper();
-	JsonNode node = null;
 	String number = CommonUtil.getNullOrTrimmedValue(extendedRequestDTO
 		.getMsisdn());
 	String imsi = CommonUtil.getNullOrTrimmedValue(extendedRequestDTO
@@ -204,6 +221,16 @@ public class GetAttributeRequestHandler extends
 	    msisdn = CommonUtil.extractNumberFromMsisdn(number);
 	}
 
+	String	duplicateRequestId = checkDuplicateRequestCode(extendedRequestDTO.getUser().getId(),apiServiceCalls.getApiServiceCallId(),MessageProcessStatus.Success, MessageType.Response,extendedRequestDTO.getRequestIdentifier());
+
+		if(duplicateRequestId != null)
+		{
+			LOG.error("###CUSTOMERINFO### Already used requestIdentifier code is entered");
+			responseWrapperDTO.setRequestError(constructRequestError(SERVICEEXCEPTION,
+					ServiceError.INVALID_INPUT_VALUE, "An already used requestIdentifier code is entered"));
+			responseWrapperDTO.setHttpStatus(Response.Status.BAD_REQUEST);
+			return responseWrapperDTO;
+		}
 	List<AttributeValues> customerInfoServices = null;
 
 	// check request parameter schema has the matching values
@@ -251,23 +278,17 @@ public class GetAttributeRequestHandler extends
 		    .getAttributeName().toString();
 	    if (values.getValue()!=null && (Attribute.basic.toString()).equals(schemaValues)) {
 	    	isNullObject = false;
-		node = mapper.readValue(values.getValue(), JsonNode.class);
-		customerInfo.setBasic(node);
+			customerInfo.setBasic(mapper.readValue(values.getValue().toString(), JsonNode.class));
 
 	    } else if (values.getValue()!=null && (Attribute.billing.toString()).equals(schemaValues)) {
 	    	isNullObject = false;
-		node = mapper.readValue(values.getValue(), JsonNode.class);
-		customerInfo.setBilling(node);
+		customerInfo.setBilling(mapper.readValue(values.getValue(), JsonNode.class));
 	    } else if (values.getValue()!=null && Attribute.account.toString().equals(schemaValues)) {
 	    	isNullObject = false;
-		node = mapper.readValue(values.getValue(), JsonNode.class);
-
-		customerInfo.setAccount(node);
+		customerInfo.setAccount(mapper.readValue(values.getValue(), JsonNode.class));
 	    } else if (values.getValue()!=null &&  Attribute.identification.toString().equals(schemaValues)) {
 	    	isNullObject = false;
-		node = mapper.readValue(values.getValue(), JsonNode.class);
-
-		customerInfo.setIdentification(node);
+		customerInfo.setIdentification(mapper.readValue(values.getValue(), JsonNode.class));
 	    }
 	}
 	if(isNullObject){
@@ -289,12 +310,17 @@ public class GetAttributeRequestHandler extends
 	customerInfo.setPurchaseCategoryCode(CommonUtil.getNullOrTrimmedValue(extendedRequestDTO.getPurchaseCategoryCode()));
 	customerInfo.setRequestIdentifier( CommonUtil.getNullOrTrimmedValue(extendedRequestDTO.getRequestIdentifier()));
 	customerInfo.setResponseIdentifier("RES" + RandomStringUtils.randomAlphabetic(8));
-	
-	
 	ListCustomerInfoDTO customer = new ListCustomerInfoDTO();
 	customer.setCustomer(customerInfo);
-	responseWrapperDTO.setCustomer(customer);
+	responseWrapperDTO.setListCustomerInfoDTO(customer);
 	responseWrapperDTO.setHttpStatus(Response.Status.OK);
+	if(msisdn != null) {
+		saveResponse(extendedRequestDTO.getMsisdn(), customer, apiServiceCalls, MessageProcessStatus.Success);
+	}
+	else
+	{
+		saveResponse(extendedRequestDTO.getImsi(), customer, apiServiceCalls, MessageProcessStatus.Success);
+	}
 	return responseWrapperDTO;
 
     }
@@ -317,5 +343,78 @@ public class GetAttributeRequestHandler extends
 
 			return false;
 		}
+	}
+
+	private String checkDuplicateRequestCode(int userId, int serviceNameId, MessageProcessStatus status, MessageType type, String requestIdentityCode) throws Exception {
+		List<Integer> serviceNameIdList = new ArrayList();
+		serviceNameIdList.add(serviceNameId);
+		String requestCode = null;
+		try {
+			List<MessageLog> messageLogs = loggingDAO.getMessageLogs(userId,serviceNameIdList,null,null,null,null);
+			for(int i=0;i<messageLogs.size();i++)
+			{
+				if(messageLogs!=null)
+				{
+					int logStatus =  messageLogs.get(i).getStatus();
+					int logType = messageLogs.get(i).getType();
+					if(logStatus == status.getValue() && logType == type.getValue())
+					{
+						String logRequest = messageLogs.get(i).getRequest();
+
+
+						JSONObject jsonObject = new JSONObject(logRequest);
+						org.json.JSONObject childJsonObject = jsonObject.getJSONObject(CUSTOMER);
+
+						requestIdentifierCode = childJsonObject.getString(REQUESTIDENTIFIER);
+						int logUserId = messageLogs.get(i).getUserid();
+
+							if (logUserId == userId && requestIdentifierCode.equals(requestIdentityCode)) {
+
+								requestCode = requestIdentifierCode;
+								break;
+							}
+					}
+				}
+			}
+
+		} catch (Exception e) {
+			LOG.error("an Error occurred while retrieving messagelog table values "+e);
+			throw e;
+		}
+		return requestCode;
+	}
+
+
+
+	private void saveResponse(String endUserId, ListCustomerInfoDTO listCustomerInfoDTO, APIServiceCalls serviceCalls, MessageProcessStatus status) throws Exception {
+		ObjectMapper mapper = new ObjectMapper();
+		String jsonRequestString = null;
+		try {
+			jsonRequestString = mapper.writeValueAsString(listCustomerInfoDTO);
+		} catch (JsonProcessingException e) {
+			LOG.error("an error occurred while converting JsonNode to string"+e);
+			responseWrapperDTO.setHttpStatus(Response.Status.BAD_REQUEST);
+		}
+		MessageLog messageLog = new MessageLog();
+		messageLog.setRequest(jsonRequestString);
+		messageLog.setUserid(user.getId());
+		messageLog.setStatus(status.getValue());
+		messageLog.setType(MessageType.Response.getValue());
+		if(listCustomerInfoDTO.getCustomer().getMsisdn() != null) {
+			messageLog.setReference(MSISDN);
+		}
+		if(listCustomerInfoDTO.getCustomer().getMsisdn()==null)
+		{
+			messageLog.setReference(IMSI);
+		}
+		messageLog.setValue(endUserId);
+		messageLog.setServicenameid(serviceCalls.getApiServiceCallId());
+		try {
+			loggingDAO.saveMessageLog(messageLog);
+		} catch (Exception e) {
+			LOG.error("An error occured while saving the response"+e);
+			throw e;
+		}
+
 	}
 }

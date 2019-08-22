@@ -1,6 +1,8 @@
 package com.wso2telco.services.dep.sandbox.servicefactory;
 
 import com.wso2telco.services.dep.sandbox.servicefactory.generic.GenericServiceFactory;
+import com.wso2telco.services.dep.sandbox.servicefactory.ussd.USSDConfigServiceFactory;
+import com.wso2telco.services.dep.sandbox.servicefactory.ussd.USSDRequestFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -40,6 +42,7 @@ public class RequestBuilderFactory {
 			break;
 		case USSD:
 			LOG.debug("LOADING USSD FACTORY");
+			requestHandler = USSDRequestFactory.getInstance(requestDTO);
 			break;
 		case PAYMENT:
 			LOG.debug("LOADING PAYMENT FACTORY");
@@ -80,6 +83,14 @@ public class RequestBuilderFactory {
 		case GENERIC:
 			LOG.debug("LOADING GENERIC FACTORY");
 			requestHandler =  GenericServiceFactory.getInstance(requestDTO);
+			break;
+		case USSDCONFIG:
+			LOG.debug("LOADING USSD CONFIGURATION FACTORY");
+			requestHandler = USSDConfigServiceFactory.getInstance(requestDTO);
+			break;
+		case SMSCONFIG:
+			LOG.debug("LOADING SMS CONFIGURATION FACTORY");
+			requestHandler = SMSRequestFactory.getInstance(requestDTO);
 			break;
 		default:
 			LOG.debug("APPROPIATE FACTORY CLASS NOT FOUND");
