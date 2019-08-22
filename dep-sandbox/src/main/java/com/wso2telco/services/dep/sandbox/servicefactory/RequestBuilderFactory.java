@@ -1,5 +1,6 @@
 package com.wso2telco.services.dep.sandbox.servicefactory;
 
+import com.wso2telco.services.dep.sandbox.servicefactory.generic.GenericServiceFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -76,6 +77,10 @@ public class RequestBuilderFactory {
 		    LOG.debug("LOADING WALLET CONFIGURATION FACTORY");
 		    requestHandler = WalletConfigServiceFactory.getInstance(requestDTO);
 		    break;
+		case GENERIC:
+			LOG.debug("LOADING GENERIC FACTORY");
+			requestHandler =  GenericServiceFactory.getInstance(requestDTO);
+			break;
 		default:
 			LOG.debug("APPROPIATE FACTORY CLASS NOT FOUND");
 			break;
