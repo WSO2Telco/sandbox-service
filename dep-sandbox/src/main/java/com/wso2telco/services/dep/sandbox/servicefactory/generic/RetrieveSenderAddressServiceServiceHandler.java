@@ -1,7 +1,6 @@
 package com.wso2telco.services.dep.sandbox.servicefactory.generic;
 
 import com.wso2telco.core.dbutils.exception.ServiceError;
-import com.wso2telco.services.dep.sandbox.dao.DaoFactory;
 import com.wso2telco.services.dep.sandbox.dao.model.custom.RetrieveSenderAddressServiceRequestWrapper;
 import com.wso2telco.services.dep.sandbox.dao.model.domain.SenderAddress;
 import com.wso2telco.services.dep.sandbox.dao.model.domain.User;
