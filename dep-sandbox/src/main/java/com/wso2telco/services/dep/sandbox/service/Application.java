@@ -16,13 +16,13 @@
 
 package com.wso2telco.services.dep.sandbox.service;
 
+import com.wso2telco.core.mi.AbstractApplication;
+import io.dropwizard.setup.Environment;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import com.wso2telco.core.mi.AbstractApplication;
-import com.wso2telco.core.mi.ConfigDTO;
-
-import io.dropwizard.setup.Environment;
+import static com.wso2telco.services.dep.sandbox.service.SandboxDTO.getBehaveType;
 
 public class Application extends AbstractApplication<SandboxDTO> {
 
@@ -30,7 +30,6 @@ public class Application extends AbstractApplication<SandboxDTO> {
 	protected List<Object> getRestFulComponents() {
 		List<Object>  listOfObject =new ArrayList<Object>();
 		listOfObject.add(new UserService());
-		listOfObject.add(new SandboxService());
 		listOfObject.add(new ProvisionService());
 		listOfObject.add(new ProvisionConfigurationService());
 		listOfObject.add(new CustomerInfoService());
@@ -38,14 +37,30 @@ public class Application extends AbstractApplication<SandboxDTO> {
 		listOfObject.add(new CreditService());
 		listOfObject.add(new WalletService());
 		listOfObject.add(new WalletConfigurationService());
+		listOfObject.add(new CommonService());
+		listOfObject.add(new PaymentService_v0_8());
+		listOfObject.add(new PaymentService_v1_3());
+		listOfObject.add(new LocationService());
+		listOfObject.add(new USSDService());
+		listOfObject.add(new USSSDConfigurationService());
+		listOfObject.add(new SMSConfigurationService());
+
+		if(getBehaveType().equals("Hub")){
+
+			listOfObject.add(new smsServiceHub());
+
+		}else if(getBehaveType().equals("Gateway")) {
+
+			listOfObject.add(new SmsServiceGateway());
+		}
 		return listOfObject;
 	}
-
 
 	public static void main(String[] args) {
 		try {
 			new Application().run(args);
 		}   catch (Exception e) {
+		    e.printStackTrace();
 			System.out.println("Unable to start the server " + e.getMessage());
 		}
 	}
