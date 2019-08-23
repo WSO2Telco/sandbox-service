@@ -28,16 +28,14 @@ public class CommonService {
     Log LOG = LogFactory.getLog(CommonService.class);
 
     @GET
-    @Path("/{endUserId}/senderAddress")
+    @Path("/senderAddress")
     @ApiOperation(value = "listSenderAddresses", notes = "List of available sender addresses", response = Response.class)
     @ApiImplicitParams({ @ApiImplicitParam(name = "sandbox", value = "username", required = true, dataType = "string", paramType = "header") })
-    public Response getSenderAddressesList(
-            @ApiParam(value = "endUserId", required = false) @PathParam("endUserId") String endUserId,
-            @Context HttpServletRequest httpRequest) {
+    public Response getSenderAddressesList(@Context HttpServletRequest httpRequest) {
         RetrieveSenderAddressServiceRequestWrapper requestDTO = new RetrieveSenderAddressServiceRequestWrapper();
         requestDTO.setRequestType(RequestType.GENERIC);
         requestDTO.setHttpRequest(httpRequest);
-        requestDTO.setEndUserId(endUserId);
+        requestDTO.setUserName(httpRequest.getHeader("sandbox"));
         RequestHandleable handler = RequestBuilderFactory
                 .getInstance(requestDTO);
         Returnable returnable = null;

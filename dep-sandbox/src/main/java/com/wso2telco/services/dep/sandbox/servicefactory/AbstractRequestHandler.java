@@ -123,7 +123,7 @@ public abstract class AbstractRequestHandler<E2 extends RequestDTO> implements R
 
 	protected abstract Returnable getResponseDTO();
 
-	protected abstract List<String> getAddress();
+	protected abstract List<String> getAddress() throws Exception;
 
 	protected abstract boolean validate(E2 wrapperDTO) throws Exception;
 

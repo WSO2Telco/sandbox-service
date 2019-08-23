@@ -1,7 +1,9 @@
 package com.wso2telco.services.dep.sandbox.servicefactory.generic;
 
 import com.wso2telco.core.dbutils.exception.ServiceError;
+import com.wso2telco.services.dep.sandbox.dao.DaoFactory;
 import com.wso2telco.services.dep.sandbox.dao.model.custom.RetrieveSenderAddressServiceRequestWrapper;
+import com.wso2telco.services.dep.sandbox.dao.model.domain.ManageNumber;
 import com.wso2telco.services.dep.sandbox.dao.model.domain.SenderAddress;
 import com.wso2telco.services.dep.sandbox.dao.model.domain.User;
 import com.wso2telco.services.dep.sandbox.servicefactory.AbstractRequestHandler;
@@ -18,9 +20,11 @@ public class RetrieveSenderAddressServiceServiceHandler extends AbstractRequestH
 
     private RetrieveSenderAddressServiceResponseWrapper responseWrapper;
     private RetrieveSenderAddressServiceRequestWrapper requestWrapper;
+    private User user;
 
     {
         LOG = LogFactory.getLog(RetrieveSenderAddressServiceServiceHandler.class);
+        userDAO = DaoFactory.getUserDAO();
     }
 
     @Override
@@ -29,9 +33,13 @@ public class RetrieveSenderAddressServiceServiceHandler extends AbstractRequestH
     }
 
     @Override
-    protected List<String> getAddress() {
-        List<String> address = new ArrayList<String>();
-        address.add(requestWrapper.getEndUserId());
+    protected List<String> getAddress() throws Exception {
+        List<String> address = new ArrayList<>();
+       user = userDAO.getUser(requestWrapper.getUserName());
+       List<ManageNumber> manageNumber = user.getNumberList();
+       for(ManageNumber number : manageNumber){
+           address.add(number.getNumber());
+       }
         return address;
     }
 
